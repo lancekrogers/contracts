@@ -27,4 +27,4 @@ just clean    # forge clean
 
 ## License
 
-Apache-2.0
+MIT
