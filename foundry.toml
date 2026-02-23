@@ -4,4 +4,5 @@ out = "out"
 libs = ["lib"]
 
 [rpc_endpoints]
+hedera = "https://testnet.hashio.io/api"
 zerog = "https://evmrpc-testnet.0g.ai"

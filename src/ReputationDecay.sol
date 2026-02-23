@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {IHederaScheduleService} from "./interfaces/IHederaScheduleService.sol";
+
 /// @title ReputationDecay
 /// @notice Tracks agent reputation with configurable linear time-decay.
 /// Reputation decays linearly toward zero based on time elapsed since
@@ -116,6 +118,30 @@ contract ReputationDecay {
         if (newRate == 0) revert InvalidDecayRate();
         emit DecayRateChanged(decayRatePerSecond, newRate);
         decayRatePerSecond = newRate;
+    }
+
+    // ── HIP-1215 Scheduling ──────────────────────────────────────────
+
+    /// @notice Hedera Schedule Service system contract at address 0x167.
+    IHederaScheduleService constant SCHEDULE = IHederaScheduleService(address(0x167));
+
+    /// @notice Schedule a future decay pass for the given agents via HIP-1215.
+    /// @param agents Array of agent addresses whose reputation will be decayed.
+    /// @param executeAt Unix timestamp for scheduled execution.
+    function scheduleDecay(address[] calldata agents, uint256 executeAt) external onlyOwner {
+        require(SCHEDULE.hasScheduleCapacity(), "no schedule capacity");
+        bytes memory data = abi.encodeWithSelector(this.processDecay.selector, agents);
+        SCHEDULE.scheduleNative(address(this), 0, data, executeAt);
+    }
+
+    /// @notice Force a decay pass on the given agents by reading their current score.
+    /// @param agents Array of agent addresses to decay.
+    function processDecay(address[] calldata agents) external {
+        for (uint256 i; i < agents.length; ++i) {
+            AgentReputation storage rep = reputations[agents[i]];
+            rep.score = _decayedScore(rep.score, rep.lastUpdated);
+            rep.lastUpdated = block.timestamp;
+        }
     }
 
     /// @notice Transfer ownership to a new address.

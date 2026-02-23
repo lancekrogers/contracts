@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import "../src/AgentSettlement.sol";
+import "../src/interfaces/IHederaScheduleService.sol";
 
 contract AgentSettlementTest is Test {
     AgentSettlement settlement;
@@ -97,6 +98,55 @@ contract AgentSettlementTest is Test {
     function test_transferOwnership_revertsZeroAddress() public {
         vm.expectRevert(AgentSettlement.ZeroAddress.selector);
         settlement.transferOwnership(address(0));
+    }
+
+    // ── HIP-1215 Scheduling Tests ────────────────────────────────────
+
+    address constant SCHEDULE_ADDR = address(0x167);
+
+    function _mockScheduleService(bool hasCapacity) internal {
+        vm.etch(SCHEDULE_ADDR, hex"00");
+        vm.mockCall(
+            SCHEDULE_ADDR,
+            abi.encodeWithSelector(IHederaScheduleService.hasScheduleCapacity.selector),
+            abi.encode(hasCapacity)
+        );
+        vm.mockCall(
+            SCHEDULE_ADDR,
+            abi.encodeWithSelector(IHederaScheduleService.scheduleNative.selector),
+            abi.encode(address(0xBEEF))
+        );
+    }
+
+    function test_scheduleBatchSettle() public {
+        _mockScheduleService(true);
+
+        address[] memory agents = new address[](1);
+        agents[0] = agent1;
+        bytes32[] memory taskIds = new bytes32[](1);
+        taskIds[0] = keccak256("sched-1");
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1 ether;
+
+        settlement.scheduleBatchSettle{value: 1 ether}(
+            agents, taskIds, amounts, block.timestamp + 1 hours
+        );
+    }
+
+    function test_scheduleBatchSettle_revertsNoCapacity() public {
+        _mockScheduleService(false);
+
+        address[] memory agents = new address[](1);
+        agents[0] = agent1;
+        bytes32[] memory taskIds = new bytes32[](1);
+        taskIds[0] = keccak256("sched-2");
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1 ether;
+
+        vm.expectRevert("no schedule capacity");
+        settlement.scheduleBatchSettle{value: 1 ether}(
+            agents, taskIds, amounts, block.timestamp + 1 hours
+        );
     }
 
     receive() external payable {}

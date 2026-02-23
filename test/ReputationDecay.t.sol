@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import "../src/ReputationDecay.sol";
+import "../src/interfaces/IHederaScheduleService.sol";
 
 contract ReputationDecayTest is Test {
     ReputationDecay reputation;
@@ -125,5 +126,57 @@ contract ReputationDecayTest is Test {
     function test_transferOwnership() public {
         reputation.transferOwnership(agent1);
         assertEq(reputation.owner(), agent1);
+    }
+
+    // ── HIP-1215 Scheduling Tests ────────────────────────────────────
+
+    address constant SCHEDULE_ADDR = address(0x167);
+
+    function _mockScheduleService(bool hasCapacity) internal {
+        vm.etch(SCHEDULE_ADDR, hex"00");
+        vm.mockCall(
+            SCHEDULE_ADDR,
+            abi.encodeWithSelector(IHederaScheduleService.hasScheduleCapacity.selector),
+            abi.encode(hasCapacity)
+        );
+        vm.mockCall(
+            SCHEDULE_ADDR,
+            abi.encodeWithSelector(IHederaScheduleService.scheduleNative.selector),
+            abi.encode(address(0xBEEF))
+        );
+    }
+
+    function test_scheduleDecay() public {
+        _mockScheduleService(true);
+
+        address[] memory agents = new address[](2);
+        agents[0] = agent1;
+        agents[1] = agent2;
+
+        reputation.scheduleDecay(agents, block.timestamp + 1 hours);
+    }
+
+    function test_scheduleDecay_revertsNoCapacity() public {
+        _mockScheduleService(false);
+
+        address[] memory agents = new address[](1);
+        agents[0] = agent1;
+
+        vm.expectRevert("no schedule capacity");
+        reputation.scheduleDecay(agents, block.timestamp + 1 hours);
+    }
+
+    function test_processDecay() public {
+        reputation.setDecayRate(1e18); // 1 point per second
+        reputation.updateReputation(agent1, 1000);
+
+        vm.warp(block.timestamp + 500);
+
+        address[] memory agents = new address[](1);
+        agents[0] = agent1;
+        reputation.processDecay(agents);
+
+        // After processDecay, score should be persisted as decayed value.
+        assertEq(reputation.getReputation(agent1), 500);
     }
 }

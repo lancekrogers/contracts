@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {IHederaScheduleService} from "./interfaces/IHederaScheduleService.sol";
+
 /// @title AgentSettlement
 /// @notice Handles settlement payments between the coordinator and AI agents.
 /// The coordinator calls settle() after an agent completes a task, transferring
 /// the agreed payment amount to the agent's on-chain address.
+/// Supports HIP-1215 scheduled batch settlements via the Hedera Schedule Service.
 contract AgentSettlement {
     // ── Errors ──────────────────────────────────────────────────────────
 
@@ -96,6 +99,29 @@ contract AgentSettlement {
 
             emit AgentPaid(agents[i], amounts[i], taskIds[i], block.timestamp);
         }
+    }
+
+    // ── HIP-1215 Scheduling ──────────────────────────────────────────
+
+    /// @notice Hedera Schedule Service system contract at address 0x167.
+    IHederaScheduleService constant SCHEDULE = IHederaScheduleService(address(0x167));
+
+    /// @notice Schedule a batch settlement for deferred execution via HIP-1215.
+    /// @param agents Array of agent payment addresses.
+    /// @param taskIds Array of unique task identifiers.
+    /// @param amounts Array of payment amounts.
+    /// @param executeAt Unix timestamp for scheduled execution.
+    function scheduleBatchSettle(
+        address[] calldata agents,
+        bytes32[] calldata taskIds,
+        uint256[] calldata amounts,
+        uint256 executeAt
+    ) external payable onlyOwner {
+        require(SCHEDULE.hasScheduleCapacity(), "no schedule capacity");
+        bytes memory data = abi.encodeWithSelector(
+            this.batchSettle.selector, agents, taskIds, amounts
+        );
+        SCHEDULE.scheduleNative(address(this), msg.value, data, executeAt);
     }
 
     /// @notice Transfer ownership to a new address.
