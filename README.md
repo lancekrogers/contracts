@@ -4,14 +4,15 @@ Solidity contracts for agent settlement and reputation tracking.
 
 Part of the [ETHDenver 2026 Agent Economy](../README.md) submission.
 
-> **Status:** Scaffolded but not yet implemented. Optional Track 2 submission.
+**Status:** Implemented. All contracts compile and pass Forge tests (34 tests).
 
-## Planned Contracts
+## Contracts
 
 | Contract | Purpose |
 |----------|---------|
-| `AgentSettlement.sol` | Cross-agent payment settlement on-chain |
-| `ReputationDecay.sol` | Time-decaying reputation scores for agents |
+| `AgentSettlement.sol` | Cross-agent payment settlement on-chain (settle, batchSettle, ownership, events) |
+| `ReputationDecay.sol` | Time-decaying reputation scores for agents (updateReputation, getReputation) |
+| `AgentINFT.sol` | ERC-7857 iNFT for agent inference provenance on 0G Chain (mint, updateEncryptedMetadata, getTokenData) |
 
 ## Prerequisites
 
