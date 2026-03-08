@@ -6,6 +6,8 @@
 
 Solidity smart contracts providing on-chain settlement, time-decaying reputation tracking, and inference provenance for the OBEY Agent Economy.
 
+Part of the [Obey Agent Economy](https://github.com/lancekrogers/Obey-Agent-Economy) project.
+
 > **TL;DR** — Three contracts cover the full lifecycle of agent work: `AgentSettlement` pays agents for completed tasks (single or batch), `ReputationDecay` scores agents with automatic linear decay so stale reputation fades, and `AgentINFT` mints ERC-7857 iNFTs that cryptographically anchor AI inference results to the 0G Chain DA layer. All three support Hedera HIP-1215 scheduled execution.
 
 ---
