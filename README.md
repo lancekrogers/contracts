@@ -111,6 +111,27 @@ event MetadataUpdated(uint256 indexed tokenId, bytes32 newHash);
 
 ---
 
+### AgentIdentityRegistry
+
+ERC-8004 agent identity registry for Base Sepolia. Agents register their public key and metadata on-chain for trustless identity verification. Matches the ABI expected by `agent-defi/internal/base/identity/register.go`.
+
+**Key functions**
+
+| Signature | Description |
+|-----------|-------------|
+| `register(bytes32 agentId, bytes pubKey, bytes metadata) external` | Register an agent identity. Reverts if already registered. |
+| `getIdentity(bytes32 agentId) external view returns (uint8 status, bytes metadata, bytes signature)` | Get identity record for an agent. Status: 0=unregistered, 1=active, 2=revoked. |
+| `revoke(bytes32 agentId) external` | Revoke an active agent identity. |
+
+**Events**
+
+```solidity
+event AgentRegistered(bytes32 indexed agentId, address indexed owner);
+event AgentRevoked(bytes32 indexed agentId);
+```
+
+---
+
 ### IHederaScheduleService (interface)
 
 Interface for the Hedera Schedule Service system contract deployed at address `0x167`. Used by both `AgentSettlement` and `ReputationDecay` to enable HIP-1215 deferred execution.
@@ -128,29 +149,49 @@ function signSchedule(address schedule) external;
 ```
 contracts/
 ├── src/
-│   ├── AgentSettlement.sol       # Payment settlement with replay protection
-│   ├── ReputationDecay.sol       # Time-decaying reputation scores
-│   ├── AgentINFT.sol             # ERC-7857 iNFT for inference provenance
+│   ├── AgentSettlement.sol            # Payment settlement with replay protection
+│   ├── ReputationDecay.sol            # Time-decaying reputation scores
+│   ├── AgentINFT.sol                  # ERC-7857 iNFT for inference provenance
+│   ├── AgentIdentityRegistry.sol      # ERC-8004 agent identity registry
 │   └── interfaces/
-│       └── IHederaScheduleService.sol  # HIP-1215 schedule service interface
+│       └── IHederaScheduleService.sol # HIP-1215 schedule service interface
 ├── test/
-│   ├── AgentSettlement.t.sol     # 13 tests: settle, batch, HIP-1215, auth
-│   ├── ReputationDecay.t.sol     # 14 tests: decay math, scheduling, edge cases
-│   └── AgentINFT.t.sol           # 7 tests: mint, metadata update, ownership
+│   ├── AgentSettlement.t.sol          # 13 tests: settle, batch, HIP-1215, auth
+│   ├── ReputationDecay.t.sol          # 14 tests: decay math, scheduling, edge cases
+│   └── AgentINFT.t.sol               # 7 tests: mint, metadata update, ownership
 ├── script/
-│   └── Deploy.s.sol              # Forge broadcast script (Hedera + 0G testnet)
+│   └── Deploy.s.sol                   # Forge broadcast script (Hedera, 0G, Base)
 ├── lib/
-│   ├── forge-std/                # Forge standard library
-│   └── openzeppelin-contracts/   # OZ ERC-721, Ownable
-├── foundry.toml                  # RPC endpoints: hedera, zerog
-└── justfile                      # Build commands
+│   ├── forge-std/                     # Forge standard library
+│   └── openzeppelin-contracts/        # OZ ERC-721, Ownable
+├── foundry.toml                       # RPC endpoints: hedera, zerog
+└── justfile                           # Build commands
 ```
 
 ---
 
 ## Deployment
 
-The deploy script broadcasts all three contracts in a single run.
+The deploy script broadcasts all four contracts in a single run.
+
+**0G Galileo testnet**
+
+```bash
+forge script script/Deploy.s.sol \
+  --rpc-url zerog \
+  --broadcast \
+  --private-key $ZG_CHAIN_PRIVATE_KEY \
+  --with-gas-price 3000000000 --priority-gas-price 3000000000
+```
+
+**Base Sepolia**
+
+```bash
+forge script script/Deploy.s.sol \
+  --rpc-url https://sepolia.base.org \
+  --broadcast \
+  --private-key $DEFI_PRIVATE_KEY
+```
 
 **Hedera testnet**
 
@@ -161,15 +202,6 @@ forge script script/Deploy.s.sol \
   --private-key $PRIVATE_KEY
 ```
 
-**0G Galileo testnet**
-
-```bash
-forge script script/Deploy.s.sol \
-  --rpc-url zerog \
-  --broadcast \
-  --private-key $ZG_CHAIN_PRIVATE_KEY
-```
-
 RPC endpoints are preconfigured in `foundry.toml`:
 
 | Network | RPC URL |
@@ -177,7 +209,24 @@ RPC endpoints are preconfigured in `foundry.toml`:
 | Hedera testnet | `https://testnet.hashio.io/api` |
 | 0G Galileo testnet | `https://evmrpc-testnet.0g.ai` |
 
-> No addresses have been committed — deploy addresses are printed to stdout after each broadcast run.
+### Deployed Addresses
+
+**0G Galileo (Chain ID 16602)** — Wallet: `0x38CB2E2eeb45E6F70D267053DcE3815869a8C44d`
+
+| Contract | Address |
+|----------|---------|
+| ReputationDecay | `0xbdCdBfd93C4341DfE3408900A830CBB0560a62C4` |
+| AgentSettlement | `0x437c2bF7a00Da07983bc1eCaa872d9E2B27A3d40` |
+| AgentINFT | `0x17F41075454cf268D0672dd24EFBeA29EF2Dc05b` |
+
+**Base Sepolia (Chain ID 84532)** — Wallet: `0xc71d8a19422c649fe9bdcbf3ffa536326c82b58b`
+
+| Contract | Address |
+|----------|---------|
+| AgentIdentityRegistry | `0x0C97820abBdD2562645DaE92D35eD581266CCe70` |
+| AgentSettlement | `0xa5378FbDCD2799C549A559C1C7c1F91D7C983A44` |
+| ReputationDecay | `0x54734cC3AF4Db984cD827f967BaF6C64DEAEd0B1` |
+| AgentINFT | `0xfcA344515D72a05232DF168C1eA13Be22383cCB6` |
 
 ---
 
