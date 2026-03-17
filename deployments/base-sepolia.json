@@ -1,0 +1,39 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "contracts": {
+    "ObeyVault": {
+      "address": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
+      "deployTx": "0x26125e050928c3d259f545a58f7843651fe4610afcc108e2c2d6524726214473",
+      "blockNumber": 38981635,
+      "deployer": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "constructorArgs": {
+        "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "agent": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+        "swapRouter": "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4",
+        "uniswapFactory": "0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24",
+        "maxSwapSize": "1000000000",
+        "maxDailyVolume": "10000000000",
+        "maxSlippageBps": 100
+      },
+      "verified": true,
+      "verifiedOn": "Sourcify",
+      "note": "Redeployed to fix incorrect swapRouter (was using mainnet address 0x2626...e481 which has no code on Sepolia)"
+    },
+    "ObeyVault_v1_deprecated": {
+      "address": "0xa7412780435905728260d5eaA59786e4a3C07e7E",
+      "note": "Deployed with Base Mainnet swapRouter (0x2626664c2603336E57B271c5C0b26F421741e481) — no code on Sepolia. Funds withdrawn. Reserved for mainnet use.",
+      "status": "deprecated"
+    }
+  },
+  "e2e_evidence": {
+    "swapTx": "0xafc1c6b2e0ad1e0f0bff17aa86f2cca6ab19ce2859929e5fa066b989d2d3a9d7",
+    "swapBlock": 38981662,
+    "tokenIn": "USDC",
+    "tokenOut": "WETH",
+    "amountIn": "1000000",
+    "amountOut": "1524879273434747",
+    "timestamp": "2026-03-17T07:13:32Z",
+    "loggenOutput": "1 entry captured successfully"
+  }
+}

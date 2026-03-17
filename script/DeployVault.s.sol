@@ -8,7 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DeployVault is Script {
     // --- Base Sepolia Addresses ---
     address constant SEPOLIA_USDC = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
-    address constant SEPOLIA_SWAP_ROUTER = 0x2626664c2603336E57B271c5C0b26F421741e481;
+    address constant SEPOLIA_SWAP_ROUTER = 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4;
     address constant SEPOLIA_FACTORY = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
 
     // --- Base Mainnet Addresses ---

@@ -1,0 +1,16 @@
+{
+  "network": "Base Mainnet",
+  "chainId": 8453,
+  "contracts": {
+    "ObeyVault": {
+      "address": "0xa7412780435905728260d5eaA59786e4a3C07e7E",
+      "note": "Originally deployed to Base Sepolia with mainnet router address. Reserved for mainnet deployment with correct constructor args.",
+      "constructorArgs": {
+        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "swapRouter": "0x2626664c2603336E57B271c5C0b26F421741e481",
+        "uniswapFactory": "0x33128a8fC17869897dcE68Ed026d694621f6FDfD"
+      },
+      "status": "reserved"
+    }
+  }
+}
