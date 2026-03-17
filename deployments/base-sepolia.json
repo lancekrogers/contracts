@@ -1,11 +1,11 @@
 {
   "network": "Base Sepolia",
   "chainId": 84532,
+  "date": "2026-03-17",
+  "explorer": "https://sepolia.basescan.org",
   "contracts": {
     "ObeyVault": {
       "address": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
-      "deployTx": "0x26125e050928c3d259f545a58f7843651fe4610afcc108e2c2d6524726214473",
-      "blockNumber": 38981635,
       "deployer": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
       "constructorArgs": {
         "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
@@ -22,18 +22,77 @@
     },
     "ObeyVault_v1_deprecated": {
       "address": "0xa7412780435905728260d5eaA59786e4a3C07e7E",
-      "note": "Deployed with Base Mainnet swapRouter (0x2626664c2603336E57B271c5C0b26F421741e481) — no code on Sepolia. Funds withdrawn. Reserved for mainnet use.",
+      "note": "Deployed with Base Mainnet swapRouter — no code on Sepolia. Funds withdrawn.",
       "status": "deprecated"
     }
   },
-  "e2e_evidence": {
-    "swapTx": "0xafc1c6b2e0ad1e0f0bff17aa86f2cca6ab19ce2859929e5fa066b989d2d3a9d7",
-    "swapBlock": 38981662,
-    "tokenIn": "USDC",
-    "tokenOut": "WETH",
-    "amountIn": "1000000",
-    "amountOut": "1524879273434747",
-    "timestamp": "2026-03-17T07:13:32Z",
-    "loggenOutput": "1 entry captured successfully"
-  }
+  "transactions": [
+    {
+      "description": "Deploy ObeyVault v2 (correct Sepolia router)",
+      "txHash": "0x194ca4e3b078e3d1854911de562f4003a5f4c1bf4167b5ce7eff335a3ca99605",
+      "type": "CREATE",
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "contractCreated": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
+      "explorerUrl": "https://sepolia.basescan.org/tx/0x194ca4e3b078e3d1854911de562f4003a5f4c1bf4167b5ce7eff335a3ca99605"
+    },
+    {
+      "description": "Approve WETH as trading token on new vault",
+      "txHash": "0x8c99cd15bdf251ec74aa1e8a2fb080814b845bcf869ebad2f11f5b9d84d76e1a",
+      "type": "CALL",
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "to": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
+      "method": "setApprovedToken(WETH, true)",
+      "explorerUrl": "https://sepolia.basescan.org/tx/0x8c99cd15bdf251ec74aa1e8a2fb080814b845bcf869ebad2f11f5b9d84d76e1a"
+    },
+    {
+      "description": "Redeem 20 USDC from deprecated v1 vault",
+      "txHash": "0x5213851bf6366dac9bafa3649d9813da3ddf2b0319983f079ee8de87ea4ffaf7",
+      "type": "CALL",
+      "blockNumber": 38981618,
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "to": "0xa7412780435905728260d5eaA59786e4a3C07e7E",
+      "method": "redeem(20000000, deployer, deployer)",
+      "explorerUrl": "https://sepolia.basescan.org/tx/0x5213851bf6366dac9bafa3649d9813da3ddf2b0319983f079ee8de87ea4ffaf7"
+    },
+    {
+      "description": "Approve USDC spend for new vault",
+      "txHash": "0x8ad4a4ef80d0a4de3421f03f920e2babc5705b26359696bbdcca6bac800ba9f7",
+      "type": "CALL",
+      "blockNumber": 38981625,
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "to": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "method": "approve(newVault, 20000000)",
+      "explorerUrl": "https://sepolia.basescan.org/tx/0x8ad4a4ef80d0a4de3421f03f920e2babc5705b26359696bbdcca6bac800ba9f7"
+    },
+    {
+      "description": "Deposit 10 USDC into new vault",
+      "txHash": "0x26125e050928c3d259f545a58f7843651fe4610afcc108e2c2d6524726214473",
+      "type": "CALL",
+      "blockNumber": 38981635,
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "to": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
+      "method": "deposit(10000000, deployer)",
+      "explorerUrl": "https://sepolia.basescan.org/tx/0x26125e050928c3d259f545a58f7843651fe4610afcc108e2c2d6524726214473"
+    },
+    {
+      "description": "E2E test swap: 1 USDC -> WETH via Uniswap V3 (0.3% pool)",
+      "txHash": "0xafc1c6b2e0ad1e0f0bff17aa86f2cca6ab19ce2859929e5fa066b989d2d3a9d7",
+      "type": "CALL",
+      "blockNumber": 38981662,
+      "from": "0xC71d8A19422C649fe9bdCbF3ffA536326c82b58b",
+      "to": "0xbAbDd92397Cd812593e79A5b4c2a32bB4aDb06b1",
+      "method": "executeSwap(USDC, WETH, 1000000, 990000, 'e32TestSwap')",
+      "result": {
+        "amountIn": "1000000",
+        "amountOut": "1524879273434747",
+        "tokenIn": "USDC (0x036CbD53842c5426634e7929541eC2318f3dCF7e)",
+        "tokenOut": "WETH (0x4200000000000000000000000000000000000006)",
+        "pool": "0x46880b404CD35c165EDdefF7421019F8dD25F4Ad",
+        "router": "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4",
+        "gasUsed": 258529,
+        "timestamp": "2026-03-17T07:13:32Z"
+      },
+      "explorerUrl": "https://sepolia.basescan.org/tx/0xafc1c6b2e0ad1e0f0bff17aa86f2cca6ab19ce2859929e5fa066b989d2d3a9d7"
+    }
+  ]
 }
